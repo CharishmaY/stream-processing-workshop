@@ -5,8 +5,10 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.improving.workshop.Streams;
+import org.improving.workshop.samples.PurchaseEventTicket;
 import org.msse.demo.mockdata.music.event.Event;
 
+import static java.lang.ProcessBuilder.Redirect.to;
 import static org.apache.kafka.streams.state.Stores.persistentKeyValueStore;
 import static org.improving.workshop.Streams.*;
 
@@ -36,14 +38,33 @@ public class ArtistTicketCount {
         // hint: store Events in a table so that the ticket can reference them to find the Artist
         // see samples/PurchaseEventTicket for an example of creating a KTable
 
-//        builder
-//            .stream(TOPIC_DATA_DEMO_TICKETS, Consumed.with(Serdes.String(), SERDE_TICKET_JSON))
-//            .peek((ticketId, ticketRequest) -> log.info("Ticket Requested: {}", ticketRequest))
-//
-//            // solution goes here
-//
-//            .peek((artistId, count) -> log.info("Artist '{}' has sold {} total tickets", artistId, count))
-//            // NOTE: when using ccloud, the topic must exist or 'auto.create.topics.enable' set to true (dedicated cluster required)
-//            .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
+        KTable<String, Event> eventsTable = builder
+                .table(
+                        TOPIC_DATA_DEMO_EVENTS,
+                        Materialized
+                                .<String, Event>as(persistentKeyValueStore("events"))
+                                .withKeySerde(Serdes.String())
+                                .withValueSerde(Streams.SERDE_EVENT_JSON)
+                );
+
+        builder
+                .stream(TOPIC_DATA_DEMO_TICKETS, Consumed.with(Serdes.String(), SERDE_TICKET_JSON))
+                .peek((ticketId, ticketRequest) -> log.info("Ticket Requested: {}", ticketRequest))
+                .selectKey((key, value) -> value.eventid())
+                .join(
+                        eventsTable,
+                        (eventId, ticket, event) -> new PurchaseEventTicket.EventTicket(ticket, event), Joined.with(null, SERDE_TICKET_JSON, SERDE_EVENT_JSON)
+                )
+                .selectKey((key, value) -> value.getEvent().artistid())
+                .groupByKey(Grouped.with(null, SERDE_EVENT_TICKET_JSON))
+                .count()
+                .toStream()
+
+
+                // solution goes here
+
+                .peek((artistId, count) -> log.info("Artist '{}' has sold {} total tickets", artistId, count))
+                // NOTE: when using ccloud, the topic must exist or 'auto.create.topics.enable' set to true (dedicated cluster required)
+                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
     }
 }

@@ -41,12 +41,13 @@ public class TargetCustomerFilter {
         // BONUS - add a stream off the LEGACY_INPUT_TOPIC and merge()
 
         builder
-            .stream(TOPIC_DATA_DEMO_CUSTOMERS, Consumed.with(Serdes.String(), SERDE_CUSTOMER_JSON))
+                .stream(TOPIC_DATA_DEMO_CUSTOMERS, Consumed.with(Serdes.String(), SERDE_CUSTOMER_JSON))
+                .merge(builder.stream(LEGACY_INPUT_TOPIC, Consumed.with(Serdes.String(), SERDE_CUSTOMER_JSON)))
+                .filter((key, value) -> value.birthdt().startsWith("199"))
+                // TIP - Incoming birth dt format -> "YYYY-MM-DD"
 
-            // TIP - Incoming birth dt format -> "YYYY-MM-DD"
-
-            .peek((customerId, customer) -> log.info("Target Customer Found, 90s music incoming - {}", customerId))
-            // NOTE: when using ccloud, the topic must exist or 'auto.create.topics.enable' set to true (dedicated cluster required)
-            .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), SERDE_CUSTOMER_JSON));
+                .peek((customerId, customer) -> log.info("Target Customer Found, 90s music incoming - {}", customerId))
+                // NOTE: when using ccloud, the topic must exist or 'auto.create.topics.enable' set to true (dedicated cluster required)
+                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), SERDE_CUSTOMER_JSON));
     }
 }

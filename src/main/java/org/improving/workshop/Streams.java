@@ -6,6 +6,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.improving.workshop.exercises.stateful.CustomerAttendingShows;
 import org.msse.demo.mockdata.customer.address.Address;
 import org.msse.demo.mockdata.customer.email.Email;
 import org.msse.demo.mockdata.customer.phone.Phone;
@@ -16,9 +17,13 @@ import org.msse.demo.mockdata.music.stream.Stream;
 import org.msse.demo.mockdata.music.ticket.Ticket;
 import org.msse.demo.mockdata.music.venue.Venue;
 import org.springframework.kafka.support.serializer.JsonSerde;
-
+import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
+import org.improving.workshop.samples.PurchaseEventTicket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 @Slf4j
 public class Streams {
@@ -27,6 +32,7 @@ public class Streams {
     /////////////////////////////////////
 
     // addresses
+    private static final Logger log = LoggerFactory.getLogger(Streams.class);
     public static final String TOPIC_DATA_DEMO_ADDRESSES = "data-demo-addresses";
     public static final JsonSerde<Address> SERDE_ADDRESS_JSON = new JsonSerde<>(Address.class);
     // artists
@@ -53,7 +59,11 @@ public class Streams {
     // venues
     public static final String TOPIC_DATA_DEMO_VENUES = "data-demo-venues";
     public static final JsonSerde<Venue> SERDE_VENUE_JSON = new JsonSerde<>(Venue.class);
+    public static final JsonSerde<PurchaseEventTicket.EventTicket> SERDE_EVENT_TICKET_JSON = new JsonSerde(PurchaseEventTicket.EventTicket.class);
 
+
+    public Streams() {
+    }
     /**
      * Builds the base properties needed to start the Stream
      * @return Properties

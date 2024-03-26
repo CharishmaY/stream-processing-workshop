@@ -18,8 +18,12 @@ import java.util.UUID;
 import static org.apache.kafka.streams.state.Stores.persistentKeyValueStore;
 import static org.improving.workshop.Streams.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Slf4j
 public class PurchaseEventTicket {
+    private static final Logger log = LoggerFactory.getLogger(PurchaseEventTicket.class);
     // MUST BE PREFIXED WITH "kafka-workshop-"
     public static final String OUTPUT_TOPIC = "kafka-workshop-ticket-response";
 
@@ -160,6 +164,7 @@ public class PurchaseEventTicket {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class EventTicket {
         private Ticket ticket;
         private Event event;
