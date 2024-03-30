@@ -16,7 +16,6 @@ import org.msse.demo.mockdata.music.event.Event;
 import org.msse.demo.mockdata.music.stream.Stream;
 import org.msse.demo.mockdata.music.ticket.Ticket;
 import org.msse.demo.mockdata.music.venue.Venue;
-import org.springframework.kafka.support.serializer.JsonSerde;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
@@ -25,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
-@Slf4j
 public class Streams {
     /////////////////////////////////////
     // data demo input topics & serdes //
