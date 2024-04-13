@@ -6,7 +6,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.improving.workshop.exercises.stateful.CustomerAttendingShows;
+import org.improving.workshop.project.CustomerAttendingShows;
 import org.msse.demo.mockdata.customer.address.Address;
 import org.msse.demo.mockdata.customer.email.Email;
 import org.msse.demo.mockdata.customer.phone.Phone;
@@ -85,7 +85,7 @@ public class Streams {
 //        streamsConfiguration.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
 //        streamsConfiguration.put("sasl.mechanism", "PLAIN");
 
-
+        streamsConfiguration.put("spring.json.trusted.packages", "*");
         // Specify default (de)serializers for record keys and for record values.
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, "org.springframework.kafka.support.serializer.JsonSerde");

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class ArtistsMostPopularEvent {
 
     private static final Logger log = LoggerFactory.getLogger(ArtistsMostPopularEvent.class);
-    // MUST BE PREFIXED WITH "kafka-workshop-"
+
     public static final String OUTPUT_TOPIC = "kafka-workshop-artists-most-popular-event";
 
     public static final JsonSerde<EventVenue> SERDE_EVENT_VENUE_JSON = new JsonSerde<>(EventVenue.class);
@@ -40,7 +40,6 @@ public class ArtistsMostPopularEvent {
     public static final JsonSerde<LinkedHashMap<String, Float>> LINKED_HASH_MAP_JSON_SERDE = new JsonSerde<>(LinkedHashMap.class);
 
     static {
-        // this may not have been needed once other things were done, but leaving it here - Neil
         Map<String, Object> config = new HashMap<>();
         config.put("spring.json.trusted.packages", "*");
         SERDE_EVENT_VENUE_JSON.configure(config, false);
@@ -89,7 +88,6 @@ public class ArtistsMostPopularEvent {
                 .stream(TOPIC_DATA_DEMO_EVENTS, Consumed.with(Serdes.String(), SERDE_EVENT_JSON))
                 .peek((eventId, event) -> System.out.println("Event Processed:" + eventId))
                 .selectKey((key, value) -> value.venueid())
-                //.toTable()
                 .join(venuesTable,
                         (venueId, event, venue) -> new EventVenue(event, venue),
                         Joined.with(Serdes.String(), SERDE_EVENT_JSON, SERDE_VENUE_JSON)
@@ -100,9 +98,6 @@ public class ArtistsMostPopularEvent {
                 .join(ticketsCountPerEvent,
                         (eventVenue, ticket_count) -> new EventVenueTicket(eventVenue,ticket_count),
                      store
-                     //   Materialized.with(Serdes.String(), SERDE_EVENT_VENUE_TICKET_JSON)
-                      //  Materialized.as("foo").withKeySerde(Serdes.String()).withValueSerde(SERDE_EVENT_VENUE_TICKET_JSON))
-                        //Joined.with(Serdes.String(), SERDE_EVENT_VENUE_JSON, Serdes.Long())
                 )
                 .toStream()
                 .filter((k, v) -> v.event != null && v.venue != null)
@@ -117,7 +112,6 @@ public class ArtistsMostPopularEvent {
                             if (eventPopularity == null) {
                                 eventPopularity = new SortedCounterMap(eventVenueTicket);
                             }
-                            //float EvPopularity = eventPopularity.CalculateEventPopularity();
 
                             eventPopularity.calculateEventPopularity(eventVenueTicket);
 
@@ -187,7 +181,6 @@ public class ArtistsMostPopularEvent {
         private long ticketsSold;
         private float EvPopularity;
         private int totalEvents = 0;
-       // private EventVenueTicket eventVenueTicket;
         private int eventCapacity;
         private String eventId;
         private LinkedHashMap<String, Foo> map;
@@ -198,7 +191,6 @@ public class ArtistsMostPopularEvent {
             this.map = new LinkedHashMap<>();
             this.eventId = eventVenueTicket.getEvent().id();
             this.eventCapacity = eventVenueTicket.getEvent().capacity();
-           // this.eventVenueTicket = eventVenueTicket;
         }
 
 
@@ -211,9 +203,7 @@ public class ArtistsMostPopularEvent {
 
         public LinkedHashMap<String, Float> top() {
             return map.entrySet().stream()
-                    //.map(entry -> (float) entry.getValue().ticketCount / entry.getValue().capacity)
                     .map(entry -> Map.entry(entry.getKey(), (float) entry.getValue().ticketCount / entry.getValue().capacity))
-                    //.sorted(reverseOrder(Map.Entry.comparingByValue()))
                     .sorted(reverseOrder(Map.Entry.comparingByValue()))
                     .limit(1)
                     .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));

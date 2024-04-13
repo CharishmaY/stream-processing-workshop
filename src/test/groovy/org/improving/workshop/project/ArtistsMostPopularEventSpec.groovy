@@ -90,31 +90,19 @@ class ArtistsMostPopularEventSpec extends Specification {
 
         and: 'purchased tickets for the events'
         ticketInputTopic.pipeInput(TICKETS.generate("customer-5", eventId2))
+        ticketInputTopic.pipeInput(TICKETS.generate("customer-6", eventId2))
         ticketInputTopic.pipeInput(TICKETS.generate("customer-1", eventId1))
         ticketInputTopic.pipeInput(TICKETS.generate("customer-1", eventId3))
         ticketInputTopic.pipeInput(TICKETS.generate("customer-2", eventId1))
         ticketInputTopic.pipeInput(TICKETS.generate("customer-4", eventId4))
         ticketInputTopic.pipeInput(TICKETS.generate("customer-3", eventId1))
-        //ticketInputTopic.pipeInput(TICKETS.generate("customer-5", eventId2))
-        ticketInputTopic.pipeInput(TICKETS.generate("customer-6", eventId2))
-        //ticketInputTopic.pipeInput(TICKETS.generate("customer-1", eventId3))
-        ticketInputTopic.pipeInput(TICKETS.generate("customer-2", eventId3))
-        //ticketInputTopic.pipeInput(TICKETS.generate("customer-4", eventId4))
+        ticketInputTopic.pipeInput(TICKETS.generate("customer-2", eventId2))
 
         when: 'reading the output records'
         def outputRecords = outputTopic.readRecordsToList()
 
         then: 'the expected number of records were received'
         outputRecords.size() == 8
-
-//        // record is for artist 1
-//        outputRecords[96].key() == "artist-1"
-//        outputRecords[96].value() == "us-bank-stadium"
-//
-//        // record is for artist 2
-//        outputRecords[97].key() == "artist-2"
-//        outputRecords[97].value() == "target-center"
-
         println outputRecords.stream().map(r -> r.key() + '_' + r.value()).toList()
     }
 }
